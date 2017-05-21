@@ -1,15 +1,16 @@
-function vcs.reset
+function vcs_reset
     set -g __vcs_present 0
     set -g __vcs_branch ""
+    set -g __vcs_dirty 0
     set -g __vcs_untracked 0
     set -g __vcs_missing 0
     set -g __vcs_modified 0
 end
 
-function vcs.refresh.git
+function vcs_refresh_git
     #echo "Refreshing git"
 
-    vcs.reset
+    vcs_reset
 
     set info (git branch --no-color ^ /dev/null)
 
@@ -36,20 +37,22 @@ function vcs.refresh.git
         if string match --quiet --regex "^\s*D" $line
             #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
+            set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^\s*M" $line
             #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
+            set __vcs_dirty 1
         end
     end
 end
 
-function vcs.refresh.hg
+function vcs_refresh_hg
     #echo "Refreshing hg"
 
-    vcs.reset
+    vcs_reset
 
     set __vcs_branch (hg branch ^ /dev/null)
 
@@ -70,20 +73,22 @@ function vcs.refresh.hg
         if string match --quiet --regex "^!" $line
             #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
+            set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^M" $line
             #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
+            set __vcs_dirty 1
         end
     end
 end
 
-function vcs.refresh.svn
+function vcs_refresh_svn
     #echo "Refreshing svn"
 
-    vcs.reset
+    vcs_reset
 
     set info (svn info ^ /dev/null)
     if test $status -ne 0
@@ -110,17 +115,19 @@ function vcs.refresh.svn
         if string match --quiet --regex "^!" $line
             #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
+            set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^M" $line
             #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
+            set __vcs_dirty 1
         end
     end
 end
 
-function vcs.prompt --argument vcs_type
+function vcs_prompt --argument vcs_type
 
     set -l __iadf_vcs_colour_branch "blue"
 
@@ -134,7 +141,13 @@ function vcs.prompt --argument vcs_type
     set -l __iadf_vcs_colour_modified "green"
 
     set_color --dim white
-    echo -n "[$vcs_type: "
+    echo -n "["
+    if test $__vcs_dirty -gt 0
+        set_color red
+    else
+        set_color green
+    end
+    echo -n "$vcs_type: "
     set_color normal
 
     set_color $__iadf_vcs_colour_branch
@@ -167,9 +180,9 @@ function fish_prompt
 
     set -l vcses git svn hg
     for vcs in $vcses
-        eval vcs.refresh.$vcs
+        eval vcs_refresh_$vcs
         if test $__vcs_present -ne 0
-            eval vcs.prompt $vcs
+            eval vcs_prompt $vcs
         end
     end
 
