@@ -24,6 +24,58 @@ $ omf install https://github.com/i-am-david-fernandez/omf-theme-iadf
 
 * VCS state information for multiple version control systems simultaneously (git, subversion and mercurial are supported).
 
+## Configuration
+
+The following may be set (e.g., in `config.fish`) to override defaults:
+
+* `fish_prompt_pwd_dir_length`
+  * Parameter to the standard [`prompt_pwd`](https://fishshell.com/docs/current/commands.html#prompt_pwd) fish function.
+
+* `theme_iadf_vcs_list`
+  * List of VCSes to process. Supported vcses are `git`, `svn` and `hg`.
+  * Keeping this list minimal (i.e., only including those you actually use) will help minimise prompt lag.
+
+* `theme_iadf_vcs_colour_dirty`, `theme_iadf_vcs_colour_clean`
+  * Colour of vcs name when current repo is dirty/clean.
+
+* `theme_iadf_vcs_colour_branch`
+  * Colour of the current repo's branch name.
+
+* `theme_iadf_vcs_glyph_{untracked|missing|modified}`
+  * State glyph used to indicate there are untracked/missing/modified items in the current repo.
+
+* `theme_iadf_vcs_colour_{untracked|missing|modified}`
+  * Colour of the corresponding state glyph.
+
+e.g.
+
+```
+    ## Use two charaters per path segment in shortened present-working-directory display
+    set -g fish_prompt_pwd_dir_length 2
+
+    ## Support only git and svn
+    set -g theme_iadf_vcs_list git svn
+
+    ## Show dirty repo as red, clean as green
+    set -g theme_iadf_vcs_colour_dirty "red"
+    set -g theme_iadf_vcs_colour_clean "green"
+
+    ## Show the branch name in blue
+    set -g theme_iadf_vcs_colour_branch "blue"
+
+    ## Indicate untracked files with a yellow question mark
+    set -g theme_iadf_vcs_glyph_untracked "?"
+    set -g theme_iadf_vcs_colour_untracked "yellow"
+
+    ## Indicate missing files with a red exclamation mark
+    set -g theme_iadf_vcs_glyph_missing "!"
+    set -g theme_iadf_vcs_colour_missing "red"
+
+    ## Indicate modified items with a green plus/minus symbol
+    set -g theme_iadf_vcs_glyph_modified "±"
+    set -g theme_iadf_vcs_colour_modified "green"
+```
+
 
 ## Screenshot
 
