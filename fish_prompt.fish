@@ -1,4 +1,28 @@
-function vcs_reset
+
+##
+# fish_prompt_pwd_dir_length
+
+
+function __iadf_init_prompt
+    set -q theme_iadf_vcs_list; or set -g theme_iadf_vcs_list git svn hg
+
+    set -q theme_iadf_vcs_colour_dirty; or set -g theme_iadf_vcs_colour_dirty "red"
+    set -q theme_iadf_vcs_colour_clean; or set -g theme_iadf_vcs_colour_clean "green"
+
+    set -q theme_iadf_vcs_colour_branch; or set -g theme_iadf_vcs_colour_branch "blue"
+
+    set -q theme_iadf_vcs_glyph_untracked; or set -g theme_iadf_vcs_glyph_untracked "?"
+    set -q theme_iadf_vcs_colour_untracked; or set -g theme_iadf_vcs_colour_untracked "yellow"
+
+    set -q theme_iadf_vcs_glyph_missing; or set -g theme_iadf_vcs_glyph_missing "!"
+    set -q theme_iadf_vcs_colour_missing; or set -g theme_iadf_vcs_colour_missing "red"
+
+    set -q theme_iadf_vcs_glyph_modified; or set -g theme_iadf_vcs_glyph_modified "±"
+    set -q theme_iadf_vcs_colour_modified; or set -g theme_iadf_vcs_colour_modified "green"
+end
+
+
+function __iadf_vcs_reset
     set -g __vcs_present 0
     set -g __vcs_branch ""
     set -g __vcs_dirty 0
@@ -7,10 +31,9 @@ function vcs_reset
     set -g __vcs_modified 0
 end
 
-function vcs_refresh_git
-    #echo "Refreshing git"
+function __iadf_vcs_refresh_git
 
-    vcs_reset
+    __iadf_vcs_reset
 
     set info (git branch --no-color ^ /dev/null)
 
@@ -29,30 +52,26 @@ function vcs_refresh_git
     for line in (git status --porcelain)
         ## Test for an untracked file
         if string match --quiet --regex "^\?\?" $line
-            #set __vcs_untracked (math $__vcs_untracked + 1)
             set __vcs_untracked 1
         end
 
         ## Test for a missing file
         if string match --quiet --regex "^\s*D" $line
-            #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
             set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^\s*M" $line
-            #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
             set __vcs_dirty 1
         end
     end
 end
 
-function vcs_refresh_hg
-    #echo "Refreshing hg"
+function __iadf_vcs_refresh_hg
 
-    vcs_reset
+    __iadf_vcs_reset
 
     set __vcs_branch (hg branch ^ /dev/null)
 
@@ -65,30 +84,26 @@ function vcs_refresh_hg
     for line in (hg status --color none)
         ## Test for an untracked file
         if string match --quiet --regex "^\?" $line
-            #set __vcs_untracked (math $__vcs_untracked + 1)
             set __vcs_untracked 1
         end
 
         ## Test for a missing file
         if string match --quiet --regex "^!" $line
-            #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
             set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^M" $line
-            #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
             set __vcs_dirty 1
         end
     end
 end
 
-function vcs_refresh_svn
-    #echo "Refreshing svn"
+function __iadf_vcs_refresh_svn
 
-    vcs_reset
+    __iadf_vcs_reset
 
     set info (svn info ^ /dev/null)
     if test $status -ne 0
@@ -107,65 +122,51 @@ function vcs_refresh_svn
     for line in (svn status)
         ## Test for an untracked file
         if string match --quiet --regex "^\?" $line
-            #set __vcs_untracked (math $__vcs_untracked + 1)
             set __vcs_untracked 1
         end
 
         ## Test for a missing file
         if string match --quiet --regex "^!" $line
-            #set __vcs_missing (math $__vcs_missing + 1)
             set __vcs_missing 1
             set __vcs_dirty 1
         end
 
         ## Test for a modified file
         if string match --quiet --regex "^M" $line
-            #set __vcs_modified (math $__vcs_modified + 1)
             set __vcs_modified 1
             set __vcs_dirty 1
         end
     end
 end
 
-function vcs_prompt --argument vcs_type
-
-    set -l __iadf_vcs_colour_branch "blue"
-
-    set -l __iadf_vcs_glyph_untracked "?"
-    set -l __iadf_vcs_colour_untracked "yellow"
-
-    set -l __iadf_vcs_glyph_missing "!"
-    set -l __iadf_vcs_colour_missing "red"
-
-    set -l __iadf_vcs_glyph_modified "±"
-    set -l __iadf_vcs_colour_modified "green"
+function __iadf_show_prompt_for_vcs --argument vcs_type
 
     set_color --dim white
     echo -n "["
     if test $__vcs_dirty -gt 0
-        set_color red
+        set_color $theme_iadf_vcs_colour_dirty
     else
-        set_color green
+        set_color $theme_iadf_vcs_colour_clean
     end
     echo -n "$vcs_type: "
     set_color normal
 
-    set_color $__iadf_vcs_colour_branch
+    set_color $theme_iadf_vcs_colour_branch
     echo -n "$__vcs_branch "
 
     if test $__vcs_untracked -gt 0
-        set_color $__iadf_vcs_colour_untracked
-        echo -n "$__iadf_vcs_glyph_untracked"
+        set_color $theme_iadf_vcs_colour_untracked
+        echo -n "$theme_iadf_vcs_glyph_untracked"
     end
 
     if test $__vcs_missing -gt 0
-        set_color $__iadf_vcs_colour_missing
-        echo -n "$__iadf_vcs_glyph_missing"
+        set_color $theme_iadf_vcs_colour_missing
+        echo -n "$theme_iadf_vcs_glyph_missing"
     end
 
     if test $__vcs_modified -gt 0
-        set_color $__iadf_vcs_colour_modified
-        echo -n "$__iadf_vcs_glyph_modified"
+        set_color $theme_iadf_vcs_colour_modified
+        echo -n "$theme_iadf_vcs_glyph_modified"
     end
 
     set_color --dim white
@@ -173,16 +174,22 @@ function vcs_prompt --argument vcs_type
     set_color normal
 end
 
+function __iadf_show_prompt_for_path
+    set path (prompt_pwd)
+    echo -n "$path "
+end
+
 function fish_prompt
     # Customize the prompt
 
-    echo -n "$PWD "
+    __iadf_init_prompt
 
-    set -l vcses git svn hg
-    for vcs in $vcses
-        eval vcs_refresh_$vcs
+    __iadf_show_prompt_for_path
+
+    for vcs in $theme_iadf_vcs_list
+        eval __iadf_vcs_refresh_$vcs
         if test $__vcs_present -ne 0
-            eval vcs_prompt $vcs
+            eval __iadf_show_prompt_for_vcs $vcs
         end
     end
 
