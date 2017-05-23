@@ -3,6 +3,8 @@ function __iadf_init_prompt
 
     set -q theme_iadf_vcs_list; or set -g theme_iadf_vcs_list git svn hg
 
+    set -q theme_iadf_colour_vcs; or set -g theme_iadf_colour_vcs 000
+
     set -q theme_iadf_vcs_colour_dirty; or set -g theme_iadf_vcs_colour_dirty "red"
     set -q theme_iadf_vcs_colour_clean; or set -g theme_iadf_vcs_colour_clean "green"
 
@@ -16,6 +18,10 @@ function __iadf_init_prompt
 
     set -q theme_iadf_vcs_glyph_modified; or set -g theme_iadf_vcs_glyph_modified "±"
     set -q theme_iadf_vcs_colour_modified; or set -g theme_iadf_vcs_colour_modified "green"
+
+    set -e __iadf_segment_colour
+
+    set_color normal
 end
 
 
@@ -138,6 +144,8 @@ end
 
 function __iadf_show_prompt_for_vcs --argument vcs_type
 
+    __iadf_start_segment_left $theme_iadf_colour_vcs
+
     set_color brblack
     echo -n "["
     if test $__vcs_dirty -gt 0
@@ -145,8 +153,7 @@ function __iadf_show_prompt_for_vcs --argument vcs_type
     else
         set_color $theme_iadf_vcs_colour_clean
     end
-    echo -n "$vcs_type: "
-    set_color normal
+    echo -n "$vcs_type "
 
     set_color $theme_iadf_vcs_colour_branch
     echo -n "$__vcs_branch "
@@ -168,19 +175,34 @@ function __iadf_show_prompt_for_vcs --argument vcs_type
 
     set_color brblack
     echo -n "]"
+end
+
+function __iadf_show_segment_boundary_left -a colour_left -a colour_right
+    set_color -b $colour_right $colour_left
+    echo -n \uE0B0
     set_color normal
+end
+
+function __iadf_start_segment_left -a colour
+    if set -q __iadf_segment_colour
+        set_color normal
+        set_color -b $colour $__iadf_segment_colour
+        echo -n \uE0B0
+    end
+
+    set -g __iadf_segment_colour $colour
+    set_color -b $colour
 end
 
 function __iadf_show_prompt_for_path
     set path (prompt_pwd)
-    set_color white
-    echo -n "$path "
-    set_color normal
+    __iadf_start_segment_left blue
+    echo -n "$path"
 end
 
 function __iadf_show_prompt_for_docker
     if test -e "/.dockerenv"
-        set_color cyan
+        __iadf_start_segment_left cyan
         echo -n "DOCKED "
     end
 end
@@ -202,9 +224,11 @@ function fish_prompt
     for vcs in $theme_iadf_vcs_list
         eval __iadf_vcs_refresh_$vcs
         if test $__vcs_present -ne 0
-            eval __iadf_show_prompt_for_vcs $vcs
+            __iadf_show_prompt_for_vcs $vcs
         end
     end
 
-    echo " > "
+    __iadf_start_segment_left yellow
+    __iadf_start_segment_left 000
+    echo " "
 end
