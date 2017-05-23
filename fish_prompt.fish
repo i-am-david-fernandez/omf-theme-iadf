@@ -1,9 +1,6 @@
-
-##
-# fish_prompt_pwd_dir_length
-
-
 function __iadf_init_prompt
+    set -q theme_iadf_context; or set -g theme_iadf_context ""
+
     set -q theme_iadf_vcs_list; or set -g theme_iadf_vcs_list git svn hg
 
     set -q theme_iadf_vcs_colour_dirty; or set -g theme_iadf_vcs_colour_dirty "red"
@@ -35,7 +32,7 @@ function __iadf_vcs_refresh_git
 
     __iadf_vcs_reset
 
-    set info (git branch --no-color ^ /dev/null)
+    set info (command git branch --no-color ^ /dev/null)
 
     if test $status -ne 0
         return
@@ -49,7 +46,7 @@ function __iadf_vcs_refresh_git
 
     set __vcs_present 1
 
-    for line in (git status --porcelain)
+    for line in (command git status --porcelain)
         ## Test for an untracked file
         if string match --quiet --regex "^\?\?" $line
             set __vcs_untracked 1
@@ -73,7 +70,7 @@ function __iadf_vcs_refresh_hg
 
     __iadf_vcs_reset
 
-    set __vcs_branch (hg branch ^ /dev/null)
+    set __vcs_branch (command hg branch ^ /dev/null)
 
     if test $status -ne 0
         return
@@ -81,7 +78,7 @@ function __iadf_vcs_refresh_hg
 
     set __vcs_present 1
 
-    for line in (hg status --color none)
+    for line in (command hg status --color none)
         ## Test for an untracked file
         if string match --quiet --regex "^\?" $line
             set __vcs_untracked 1
@@ -105,7 +102,7 @@ function __iadf_vcs_refresh_svn
 
     __iadf_vcs_reset
 
-    set info (svn info ^ /dev/null)
+    set info (command svn info ^ /dev/null)
     if test $status -ne 0
         return
     end
@@ -119,7 +116,7 @@ function __iadf_vcs_refresh_svn
         end
     end
 
-    for line in (svn status)
+    for line in (command svn status)
         ## Test for an untracked file
         if string match --quiet --regex "^\?" $line
             set __vcs_untracked 1
@@ -141,7 +138,7 @@ end
 
 function __iadf_show_prompt_for_vcs --argument vcs_type
 
-    set_color --dim white
+    set_color brblack
     echo -n "["
     if test $__vcs_dirty -gt 0
         set_color $theme_iadf_vcs_colour_dirty
@@ -169,20 +166,36 @@ function __iadf_show_prompt_for_vcs --argument vcs_type
         echo -n "$theme_iadf_vcs_glyph_modified"
     end
 
-    set_color --dim white
+    set_color brblack
     echo -n "]"
     set_color normal
 end
 
 function __iadf_show_prompt_for_path
     set path (prompt_pwd)
+    set_color white
     echo -n "$path "
+    set_color normal
+end
+
+function __iadf_show_prompt_for_docker
+    if test -e "/.dockerenv"
+        set_color cyan
+        echo -n "DOCKED "
+    end
 end
 
 function fish_prompt
     # Customize the prompt
 
     __iadf_init_prompt
+
+    __iadf_show_prompt_for_docker
+
+    if test -n $theme_iadf_context
+        set_color blue
+        echo -n "[$theme_iadf_context] "
+    end
 
     __iadf_show_prompt_for_path
 
