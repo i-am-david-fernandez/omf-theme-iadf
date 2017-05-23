@@ -10,6 +10,10 @@ function fish_right_prompt
     ## Store _actual_ current status for later use
     set -l real_status $status
 
+    set_color normal
+    set_color yellow
+    echo "$__theme_iadf_right_glyph "
+
     __iadf_show_segment_boundary_right 000 yellow
     __iadf_show_segment_boundary_right yellow blue
     set_color -b blue

@@ -21,6 +21,12 @@ function __iadf_init_prompt
 
     set -e __iadf_segment_colour
 
+    set -g __theme_iadf_segment_left_glyph \uE0B0
+    set -g __theme_iadf_segment_right_glyph \uE0B2
+
+    set -g __theme_iadf_left_glyph \uE0B1
+    set -g __theme_iadf_right_glyph \uE0B3
+    
     set_color normal
 end
 
@@ -187,7 +193,7 @@ function __iadf_start_segment_left -a colour
     if set -q __iadf_segment_colour
         set_color normal
         set_color -b $colour $__iadf_segment_colour
-        echo -n \uE0B0
+        echo -n $__theme_iadf_segment_left_glyph
     end
 
     set -g __iadf_segment_colour $colour
@@ -228,7 +234,9 @@ function fish_prompt
         end
     end
 
-    __iadf_start_segment_left yellow
+    #__iadf_start_segment_left yellow
     __iadf_start_segment_left 000
-    echo " "
+    set_color normal
+    set_color yellow
+    echo "$__theme_iadf_left_glyph "
 end
