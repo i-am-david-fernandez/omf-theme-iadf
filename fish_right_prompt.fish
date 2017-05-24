@@ -14,8 +14,7 @@ function fish_right_prompt
     set_color yellow
     echo "$__theme_iadf_right_glyph "
 
-    __iadf_show_segment_boundary_right 000 yellow
-    __iadf_show_segment_boundary_right yellow blue
+    __iadf_show_segment_boundary_right normal blue
     set_color -b blue
 
     if test $real_status -ne 0
