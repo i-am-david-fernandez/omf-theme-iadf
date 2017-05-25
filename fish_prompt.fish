@@ -213,12 +213,21 @@ function __iadf_show_prompt_for_docker
     end
 end
 
+function __iadf_show_prompt_for_user_host
+    set -l hostname (hostname)
+    set_color brblack
+    echo -ns (whoami) '@' $hostname ' '
+end
+
+
 function fish_prompt
     # Customize the prompt
 
     __iadf_init_prompt
 
     __iadf_show_prompt_for_docker
+
+    __iadf_show_prompt_for_user_host
 
     if test -n $theme_iadf_context
         set_color blue
