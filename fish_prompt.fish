@@ -183,11 +183,11 @@ function __iadf_show_prompt_for_vcs --argument vcs_type
     echo -n "]"
 end
 
-function __iadf_show_segment_boundary_left -a colour_left -a colour_right
-    set_color -b $colour_right $colour_left
-    echo -n \uE0B0
-    set_color normal
-end
+# function __iadf_show_segment_boundary_left -a colour_left -a colour_right
+#     set_color -b $colour_right $colour_left
+#     echo -n \uE0B0
+#     set_color normal
+# end
 
 function __iadf_start_segment_left -a colour
     set_color normal
@@ -238,5 +238,5 @@ function fish_prompt
 
     set_color normal
     set_color yellow
-    echo " $__theme_iadf_left_glyph "
+    echo "$__theme_iadf_left_glyph "
 end
