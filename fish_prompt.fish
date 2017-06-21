@@ -46,7 +46,7 @@ function __iadf_vcs_refresh_git
 
     set __vcs_present 1
 
-    for line in (command git status --porcelain)
+    for line in (command git status --porcelain ^ /dev/null)
         ## Test for an untracked file
         if string match --quiet --regex "^\?\?" $line
             set __vcs_untracked 1
