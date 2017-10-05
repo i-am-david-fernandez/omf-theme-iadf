@@ -3,9 +3,9 @@ function __iadf_init_prompt
     ## Left-side features
     set -q theme_iadf_feature_context; or set -g theme_iadf_feature_context ""
     set -q theme_iadf_feature_docker; or set -g theme_iadf_feature_docker ""
-    set -q theme_iadf_feature_userhost; or set -g theme_iadf_feature_userhost ""
-    set -q theme_iadf_feature_path; or set -g theme_iadf_feature_path ""
-    set -q theme_iadf_feature_vcs; or set -g theme_iadf_feature_vcs ""
+    set -q theme_iadf_feature_userhost; or set -g theme_iadf_feature_userhost "enable"
+    set -q theme_iadf_feature_path; or set -g theme_iadf_feature_path "enable"
+    set -q theme_iadf_feature_vcs; or set -g theme_iadf_feature_vcs "enable"
     ## Left-side colours
     set -q theme_iadf_segment_colour_context; or set -g theme_iadf_segment_colour_context "green"
     set -q theme_iadf_text_colour_context; or set -g theme_iadf_text_colour_context "brblack"
@@ -29,8 +29,16 @@ function __iadf_init_prompt
     set -q theme_iadf_context; or set -g theme_iadf_context ""
 
     ## VCS feature configuration
-    #set -q theme_iadf_vcs_list; or set -g theme_iadf_vcs_list git svn hg
-    set -q theme_iadf_vcs_list; or set -g theme_iadf_vcs_list git svn
+    ## Auto-detect available vcs tools if user has not specified a set to use.
+    set -q theme_iadf_vcs_list
+    if test  $status -ne 0
+      set -g theme_iadf_vcs_list ""
+      for vcs in git svn hg
+        if which $vcs > /dev/null ^&1
+          set theme_iadf_vcs_list $theme_iadf_vcs_list $vcs
+        end
+      end
+    end
 
     set -q theme_iadf_vcs_colour_dirty; or set -g theme_iadf_vcs_colour_dirty "red"
     set -q theme_iadf_vcs_colour_clean; or set -g theme_iadf_vcs_colour_clean "green"
@@ -274,9 +282,11 @@ end
 
 function __iadf_show_prompt_for_vcs
     for vcs in $theme_iadf_vcs_list
-        eval __iadf_vcs_refresh_$vcs
-        if test $__vcs_present -ne 0
-            __iadf_show_prompt_for_vcs_type $vcs
+        if test -n $vcs
+          eval __iadf_vcs_refresh_$vcs
+          if test $__vcs_present -ne 0
+              __iadf_show_prompt_for_vcs_type $vcs
+          end
         end
     end
 end
